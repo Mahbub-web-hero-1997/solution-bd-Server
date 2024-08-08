@@ -20,15 +20,13 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
 
-    await client.connect();
-   
-    const serviceCollections = client.db('services').collections('service')
+    await client.connect();    
+    const serviceCollection = client.db('services').collection('service')
     const carouselCollections = client.db('carousels').collection('carousel')
       // ***************************************************************************************************
       //                                       banner API's Hare
       // ***************************************************************************************************
-   
-    // post a carousel
+       // post a carousel
     app.post('/carousels', async (req, res) => {
       const cursor = req.body;
       console.log(cursor)
@@ -78,7 +76,57 @@ async function run() {
      //**************************************************************************************************
       //                                       Service API's Hare
       //*************************************************************************************************
+   
+    // post a service
+    app.post('/services', async (req, res) => { 
+      const service = req.body;
+      console.log(service)
+      const result = await serviceCollection.insertOne(service);
+      console.log(result)
+      res.send(result);
+    })
+
+    // Get All Services
+    app.get('/services', async (req, res) => { 
+      const query = serviceCollection.find();
+      const result = await query.toArray();
+      res.send(result);
+    })
+
+    // Get a single service by its ID
+    app.get('/services/:id', async (req, res) => { 
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await serviceCollection.findOne(query);
+      res.send(result);
+    })
+
+    // update Service
+
+    app.put('/services/:id', async (req, res) => { 
+       const id = req.params.id;
+      const service = req.body;
+      const filter = { _id: new ObjectId(id) }
+      const updateDoc = { upsert: true }
+      const options = {
+        $set: {
+          title: service.title,
+          discription: service.discription,
+          img_url: service.img_url,
+          price: service.price,
+        }
+      }
+      const result = await serviceCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
+
+    })
+
     
+
+
+
+
+
 
 
 
