@@ -26,7 +26,15 @@ async function run() {
     const AboutUsCollections = client.db("aboutUs").collection("about");
     const campaignCollections = client.db("campaigns").collection("campaign");
     // ***************************************************************************************************
-    //                                       About Us API's Hare
+    //                                       Service API's Hare
+    // ***************************************************************************************************
+    app.get("/services", async (req, res) => {
+      const query = serviceCollection.find();
+      const result = await query.toArray();
+      res.send(result);
+    });
+    // ***************************************************************************************************
+    //                                       campaign API's Hare
     // ***************************************************************************************************
 
     app.get("/campaign", async (req, res) => {
@@ -34,7 +42,13 @@ async function run() {
       const result = await query.toArray();
       res.send(result);
     });
-
+    app.post("/campaign", async (req, res) => {
+      const cursor = req.body;
+      console.log(cursor);
+      const result = await campaignCollections.insertOne(cursor);
+      console.log(result);
+      res.send(result);
+    });
     // ***************************************************************************************************
     //                                       About Us API's Hare
     // ***************************************************************************************************
