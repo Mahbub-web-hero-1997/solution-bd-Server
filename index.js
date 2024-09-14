@@ -33,6 +33,32 @@ async function run() {
       const result = await query.toArray();
       res.send(result);
     });
+
+    app.post("/services", async (req, res) => {
+      const cursor = req.body;
+      console.log(cursor);
+      const result = await serviceCollection.insertOne(cursor);
+      res.send(result);
+    });
+
+    app.get("/services/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await serviceCollection.findOne(query);
+      res.send(result);
+      console.log(result);
+    });
+
+    // ***************************************************************************************************
+    //                                       Booking API's Hare
+    // ***************************************************************************************************
+    app.get("/services/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await bookingCollection.findOne(query);
+      res.send(result);
+      console.log(result);
+    });
     // ***************************************************************************************************
     //                                       campaign API's Hare
     // ***************************************************************************************************
