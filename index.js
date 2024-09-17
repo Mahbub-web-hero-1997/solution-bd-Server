@@ -52,6 +52,11 @@ async function run() {
     // ***************************************************************************************************
     //                                       Booking API's Hare
     // ***************************************************************************************************
+    app.get("/bookings", async (req, res) => {
+      const query = bookingCollection.find();
+      const result = await query.toArray();
+      res.send(result);
+    });
     app.get("/services/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
