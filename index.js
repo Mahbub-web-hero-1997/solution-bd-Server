@@ -36,7 +36,6 @@ async function run() {
 
     app.post("/services", async (req, res) => {
       const cursor = req.body;
-      console.log(cursor);
       const result = await serviceCollection.insertOne(cursor);
       res.send(result);
     });
@@ -46,23 +45,32 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await serviceCollection.findOne(query);
       res.send(result);
-      console.log(result);
     });
 
     // ***************************************************************************************************
     //                                       Booking API's Hare
     // ***************************************************************************************************
     app.get("/bookings", async (req, res) => {
-      const query = bookingCollection.find();
-      const result = await query.toArray();
+      let query = {};
+      if (req.query.email) {
+        query = { email: req.query.email };
+      }
+      const result = await bookingCollection.find(query).toArray();
       res.send(result);
     });
-    app.get("/services/:id", async (req, res) => {
+    app.post("/bookings", async (req, res) => {
+      const booking = req.body;
+      const result = await bookingCollection.insertOne(booking, {
+        $set: { status: "success" },
+      });
+      res.send(result);
+    });
+
+    app.delete("/bookings/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await bookingCollection.findOne(query);
+      const result = await bookingCollection.deleteOne(query);
       res.send(result);
-      console.log(result);
     });
     // ***************************************************************************************************
     //                                       campaign API's Hare
@@ -75,9 +83,8 @@ async function run() {
     });
     app.post("/campaign", async (req, res) => {
       const cursor = req.body;
-      console.log(cursor);
       const result = await campaignCollections.insertOne(cursor);
-      console.log(result);
+      // console.log(result);
       res.send(result);
     });
     // ***************************************************************************************************
@@ -85,9 +92,8 @@ async function run() {
     // ***************************************************************************************************
     app.post("/about", async (req, res) => {
       const cursor = req.body;
-      console.log(cursor);
       const result = await AboutUsCollections.insertOne(cursor);
-      console.log(result);
+      // console.log(result);
       res.send(result);
     });
 
@@ -110,7 +116,7 @@ async function run() {
         },
       };
       const result = await AboutUsCollections.updateOne(filter, updateDoc);
-      console.log(result);
+      // console.log(result);
       res.send(result);
     });
 
@@ -120,7 +126,6 @@ async function run() {
     // post a carousel
     app.post("/carousels", async (req, res) => {
       const cursor = req.body;
-      console.log(cursor);
       const result = await carouselCollections.insertOne(cursor);
       // console.log(result);
       res.send(result);
@@ -136,7 +141,7 @@ async function run() {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const result = await carouselCollections.findOne(filter);
-      console.log(result);
+      // console.log(result);
       res.send(result);
     });
     // update the carousel
