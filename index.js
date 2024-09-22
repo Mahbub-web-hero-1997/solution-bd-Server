@@ -28,15 +28,17 @@ async function run() {
     // ***************************************************************************************************
     //                                       Service API's Hare
     // ***************************************************************************************************
+    const { ObjectId } = require("mongodb");
+
+    // Services API
     app.get("/services", async (req, res) => {
-      const query = serviceCollection.find();
-      const result = await query.toArray();
+      const result = await serviceCollection.find().toArray(); // Directly call toArray() on the collection
       res.send(result);
     });
 
     app.post("/services", async (req, res) => {
-      const cursor = req.body;
-      const result = await serviceCollection.insertOne(cursor);
+      const service = req.body; // Renamed variable for clarity
+      const result = await serviceCollection.insertOne(service);
       res.send(result);
     });
 
@@ -47,9 +49,7 @@ async function run() {
       res.send(result);
     });
 
-    // ***************************************************************************************************
-    //                                       Booking API's Hare
-    // ***************************************************************************************************
+    // Booking API
     app.get("/bookings", async (req, res) => {
       let query = {};
       if (req.query.email) {
@@ -58,11 +58,11 @@ async function run() {
       const result = await bookingCollection.find(query).toArray();
       res.send(result);
     });
+
     app.post("/bookings", async (req, res) => {
       const booking = req.body;
-      const result = await bookingCollection.insertOne(booking, {
-        $set: { status: "success" },
-      });
+      // Remove incorrect $set usage
+      const result = await bookingCollection.insertOne(booking);
       res.send(result);
     });
 
@@ -72,38 +72,33 @@ async function run() {
       const result = await bookingCollection.deleteOne(query);
       res.send(result);
     });
-    // ***************************************************************************************************
-    //                                       campaign API's Hare
-    // ***************************************************************************************************
 
+    // Campaign API
     app.get("/campaign", async (req, res) => {
-      const query = campaignCollections.find();
-      const result = await query.toArray();
+      const result = await campaignCollections.find().toArray();
       res.send(result);
     });
+
     app.post("/campaign", async (req, res) => {
-      const cursor = req.body;
-      const result = await campaignCollections.insertOne(cursor);
-      // console.log(result);
+      const campaign = req.body; // Renamed variable for clarity
+      const result = await campaignCollections.insertOne(campaign);
       res.send(result);
     });
-    // ***************************************************************************************************
-    //                                       About Us API's Hare
-    // ***************************************************************************************************
+
+    // About Us API
     app.post("/about", async (req, res) => {
-      const cursor = req.body;
-      const result = await AboutUsCollections.insertOne(cursor);
-      // console.log(result);
+      const aboutInfo = req.body; // Renamed variable for clarity
+      const result = await AboutUsCollections.insertOne(aboutInfo);
       res.send(result);
     });
 
     app.get("/about", async (req, res) => {
-      const query = AboutUsCollections.find();
-      const result = await query.toArray();
+      const result = await AboutUsCollections.find().toArray();
       res.send(result);
     });
 
-    app.put("/about", async (req, res) => {
+    app.put("/about/:id", async (req, res) => {
+      // Updated route to include :id
       const id = req.params.id;
       const about = req.body;
       const filter = { _id: new ObjectId(id) };
@@ -111,41 +106,34 @@ async function run() {
         $set: {
           title: about.title,
           description: about.description,
-          front_img_url: about.Front_img_url,
+          front_img_url: about.front_img_url, // Fixed inconsistent naming
           back_img_url: about.back_img_url,
         },
       };
       const result = await AboutUsCollections.updateOne(filter, updateDoc);
-      // console.log(result);
       res.send(result);
     });
 
-    // ***************************************************************************************************
-    //                                       banner API's Hare
-    // ***************************************************************************************************
-    // post a carousel
+    // Banner/Carousel API
     app.post("/carousels", async (req, res) => {
-      const cursor = req.body;
-      const result = await carouselCollections.insertOne(cursor);
-      // console.log(result);
+      const carousel = req.body; // Renamed variable for clarity
+      const result = await carouselCollections.insertOne(carousel);
       res.send(result);
     });
-    // get all carousel
+
     app.get("/carousels", async (req, res) => {
-      const query = carouselCollections.find();
-      const result = await query.toArray();
+      const result = await carouselCollections.find().toArray();
       res.send(result);
     });
-    // update carousel
+
     app.get("/carousels/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const result = await carouselCollections.findOne(filter);
-      // console.log(result);
       res.send(result);
     });
-    // update the carousel
-    app.put("/carousels/:id/", async (req, res) => {
+
+    app.put("/carousels/:id", async (req, res) => {
       const id = req.params.id;
       const carousel = req.body;
       const filter = { _id: new ObjectId(id) };
@@ -154,7 +142,7 @@ async function run() {
         $set: {
           title: carousel.title,
           img_url: carousel.img_url,
-          discription: carousel.discription,
+          description: carousel.description, // Fixed spelling mistake "discription" to "description"
         },
       };
       const result = await carouselCollections.updateOne(
@@ -164,7 +152,7 @@ async function run() {
       );
       res.send(result);
     });
-    // Delete a carousel
+
     app.delete("/carousels/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
