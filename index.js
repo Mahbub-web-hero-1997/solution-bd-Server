@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -29,7 +30,20 @@ async function run() {
     //                                       Service API's Hare
     // ***************************************************************************************************
     const { ObjectId } = require("mongodb");
-
+    // Jwt
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+      });
+      res
+        .cookie(token, {
+          httpOnly: true,
+          secure: false,
+          sameSite: "none",
+        })
+        .send({ success: true });
+    });
     // Services API
     app.get("/services", async (req, res) => {
       const result = await serviceCollection.find().toArray(); // Directly call toArray() on the collection
