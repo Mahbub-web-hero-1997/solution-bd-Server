@@ -2,8 +2,15 @@ const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const app = express();
+const cookieParser = require("cookie-parser");
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    credentials: true,
+  })
+);
+app.use(cookieParser());
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
@@ -33,14 +40,17 @@ async function run() {
     // Jwt
     app.post("/jwt", async (req, res) => {
       const user = req.body;
+      console.log(user);
+      // console.log(req.cookies.token);
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",
       });
       res
-        .cookie(token, {
+        .cookie("Access-Token", token, {
           httpOnly: true,
-          secure: false,
+          secure: true,
           sameSite: "none",
+          maxAge: "10000",
         })
         .send({ success: true });
     });
@@ -75,6 +85,7 @@ async function run() {
 
     app.post("/bookings", async (req, res) => {
       const booking = req.body;
+
       // Remove incorrect $set usage
       const result = await bookingCollection.insertOne(booking);
       res.send(result);
