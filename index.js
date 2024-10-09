@@ -6,7 +6,11 @@ const cookieParser = require("cookie-parser");
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "http://localhost:5173",
+      "https://solutionbd-bd192.web.app",
+      "https://solutionbd-bd192.firebaseapp.com",
+    ],
     credentials: true,
   })
 );
@@ -25,9 +29,27 @@ const client = new MongoClient(uri, {
   },
 });
 
+const logger = async (req, res, next) => {
+  // console.log(`${req.method} ${req.urlj}`);
+  next();
+};
+const verifyToken = async (req, res, next) => {
+  const token = req.cookies.AccessToken;
+  if (!token) return res.status(401).send("Access Denied");
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) return res.status(403).send({ message: "Access Denied" });
+    req.user = decoded;
+    next();
+  });
+};
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production" ? true : false,
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+};
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
     const serviceCollection = client.db("services").collection("service");
     const bookingCollection = client.db("services").collection("booking");
     const carouselCollections = client.db("carousels").collection("carousel");
@@ -36,23 +58,21 @@ async function run() {
     // ***************************************************************************************************
     //                                       Service API's Hare
     // ***************************************************************************************************
-    const { ObjectId } = require("mongodb");
+
     // Jwt
     app.post("/jwt", async (req, res) => {
       const user = req.body;
-      console.log(user);
-      // console.log(req.cookies.token);
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",
       });
-      res
-        .cookie("Access-Token", token, {
-          httpOnly: true,
-          secure: true,
-          sameSite: "none",
-          maxAge: "10000",
-        })
-        .send({ success: true });
+      res.cookie("AccessToken", token, cookieOptions).send({ success: true });
+    });
+
+    // Pagination Api
+
+    app.get("/servicesCount", async (req, res) => {
+      const count = await serviceCollection.estimatedDocumentCount();
+      res.send({ count: count });
     });
     // Services API
     app.get("/services", async (req, res) => {
@@ -74,7 +94,13 @@ async function run() {
     });
 
     // Booking API
-    app.get("/bookings", async (req, res) => {
+    app.get("/bookings", logger, verifyToken, async (req, res) => {
+      console.log(req.query.email);
+      console.log(req.user.email);
+
+      if (req.query.email !== req.user.email) {
+        return res.status(403).send({ message: "Access Denied" });
+      }
       let query = {};
       if (req.query.email) {
         query = { email: req.query.email };
@@ -191,7 +217,7 @@ async function run() {
 
     // post a service
 
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
