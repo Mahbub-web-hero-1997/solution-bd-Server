@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema } from 'mongoose';
 
 const serviceSchema = new Schema(
   {
@@ -21,7 +21,7 @@ const serviceSchema = new Schema(
     },
     extraService: {
       type: String,
-      default: "There has no extra services",
+      default: 'There has no extra services',
     },
   },
 
@@ -30,6 +30,6 @@ const serviceSchema = new Schema(
   }
 );
 
-const Service = mongoose.model("Service", serviceSchema);
+const Service = mongoose.model('Service', serviceSchema);
 
 export default Service;
