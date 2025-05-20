@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const serviceSchema = new Schema(
   {
@@ -30,4 +30,6 @@ const serviceSchema = new Schema(
   }
 );
 
-export default serviceSchema;
+const Service = mongoose.model("Service", serviceSchema);
+
+export default Service;
